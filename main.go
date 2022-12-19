@@ -22,6 +22,7 @@ var (
 	auth  = spotifyauth.New(spotifyauth.WithRedirectURL(redirectUri), spotifyauth.WithScopes(spotifyauth.ScopeUserReadPrivate, spotifyauth.ScopeUserLibraryRead))
 	state = uuid.New().String()
 	ch    = make(chan *spotify.Client)
+	client *spotify.Client
 )
 
 func CallbackHandler(w http.ResponseWriter, r *http.Request) {
@@ -46,11 +47,11 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	ch <- client
 }
 
-func main() {
+func GetSpotifyClient() *spotify.Client {
 	client, err := tryLoadClient()
 	token, tokenErr := client.Token()
 
-	if tokenErr != nil || !token.Valid() {
+	if err != nil || tokenErr != nil || !token.Valid() {
 		log.Println("A token couldn't be created from the stored configuration")
 		
 		// We're going to start the server only if we can't use the tokens from configuration
@@ -63,6 +64,12 @@ func main() {
 		log.Println(url)
 		client = <-ch
 	} 
+
+	return client
+}
+
+func main() {
+	client := GetSpotifyClient()
 	
 	user, err := client.CurrentUser(context.TODO())
 	if err != nil {
@@ -73,6 +80,13 @@ func main() {
 
 
 func tryLoadClient() (*spotify.Client, error) {
+	if client != nil {
+		_, err := client.Token()
+		if err != nil {
+			return client, nil
+		}
+	}
+
 	config, err := GetConfiguration()
 	if err != nil {
 		return nil, err
