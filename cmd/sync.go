@@ -82,7 +82,7 @@ func getOutdatedPlaylists(state data.State) ([]spotify.SimplePlaylist) {
 }
 
 func fetchPlaylistItems(id spotify.ID) ([]spotify.PlaylistItem, error) {
-	client := client.GetSpotifyClient()
+	client, _ := client.GetSpotifyClient()
 
 	total := 20
 	offset := 0
@@ -105,7 +105,7 @@ func fetchPlaylistItems(id spotify.ID) ([]spotify.PlaylistItem, error) {
 }
 
 func getPlaylists() ([]spotify.SimplePlaylist, error) {
-	client := client.GetSpotifyClient()
+	client, _ := client.GetSpotifyClient()
 
 	total := 20
 	offset := 0

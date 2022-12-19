@@ -53,29 +53,31 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	ch <- client
 }
 
-func GetSpotifyClient() *spotify.Client {
-	client, err := tryLoadClient()
-	token, tokenErr := client.Token()
+func Authenticate() *spotify.Client {		
+	// We're going to start the server only if we can't use the tokens from configuration
+	http.HandleFunc("/callback", CallbackHandler)
 
-	if err != nil || tokenErr != nil || !token.Valid() {
-		log.Println("A token couldn't be created from the stored configuration")
-		
-		// We're going to start the server only if we can't use the tokens from configuration
-		http.HandleFunc("/callback", CallbackHandler)
+	log.Printf("Server is listening at %s...", addr)
+	go http.ListenAndServe(addr, nil)
 
-		log.Printf("server is listening at %s...", addr)
-		go http.ListenAndServe(addr, nil)
-
-		url := auth.AuthURL(state)
-		log.Println(url)
-		client = <-ch
-	} 
-
+	url := auth.AuthURL(state)
+	log.Println("Please visit the following URL to authenticate: " + url)
+	client = <-ch
 	return client
 }
 
+func TestAuth() bool {
+	client, err := GetSpotifyClient()
+	token, tokenErr := client.Token()
 
-func tryLoadClient() (*spotify.Client, error) {
+	if err != nil || tokenErr != nil || !token.Valid() {
+		return false
+	}
+
+	return true
+}
+
+func GetSpotifyClient() (*spotify.Client, error) {
 	if client != nil {
 		_, err := client.Token()
 		if err != nil {

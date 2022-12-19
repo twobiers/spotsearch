@@ -24,7 +24,7 @@ func init() {
 
 func search(query string) {
 	state, _ := data.LoadState()
-	client := client.GetSpotifyClient()
+	client, _ := client.GetSpotifyClient()
 	result, err := client.Search(context.Background(), query, spotify.SearchTypeTrack)
 	if err != nil {
 		log.Fatal(err)
@@ -35,6 +35,7 @@ func search(query string) {
 	}
 
 	track := result.Tracks.Tracks[0]
+	log.Println("Searching for " + track.String())
 
 	containingPlaylists := make([]data.PlaylistState, 0)
 	for _, value := range state.Playlists {
