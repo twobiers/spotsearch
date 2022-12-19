@@ -2,8 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
-	"io"
 	"log"
 	"os"
 	"time"
@@ -24,7 +22,7 @@ var defaultConfig = Config{
 	Spotify:      SpotifyConfig{},
 }
 
-const configFilePath = "configuration.json"
+const configFilePath = "data/configuration.json"
 
 func GetConfiguration() (Config, error) {
 	file, err := getOrCreateConfigurationFile()
@@ -34,9 +32,8 @@ func GetConfiguration() (Config, error) {
 	}
 	defer file.Close()
 
-	configContentBytes, _ := io.ReadAll(file)
 	var config Config
-	err = json.Unmarshal(configContentBytes, &config)
+	err = ReadJson(file, &config)
 	
 	if err != nil {
 		log.Fatal(err)
@@ -71,7 +68,7 @@ func writeConfiguration(file *os.File, config Config) error {
 }
 
 func getOrCreateConfigurationFile() (*os.File, error) {
-	if configExists() {
+	if FileExists(configFilePath) {
 		file, err := os.OpenFile(configFilePath, os.O_RDWR, 0755)
 		if err != nil {
 			log.Fatal(err)
@@ -94,12 +91,4 @@ func getOrCreateConfigurationFile() (*os.File, error) {
 	}
 
 	return file, nil
-}
-
-func configExists() bool {
-	_, statErr := os.Stat(configFilePath)
-	if errors.Is(statErr, os.ErrNotExist) {
-		return false
-	}
-	return true
 }

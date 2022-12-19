@@ -19,7 +19,12 @@ const (
 )
 
 var (
-	auth  = spotifyauth.New(spotifyauth.WithRedirectURL(redirectUri), spotifyauth.WithScopes(spotifyauth.ScopeUserReadPrivate, spotifyauth.ScopeUserLibraryRead))
+	auth  = spotifyauth.New(spotifyauth.WithRedirectURL(redirectUri), spotifyauth.WithScopes(
+		spotifyauth.ScopeUserReadPrivate, 
+		spotifyauth.ScopeUserLibraryRead,
+		spotifyauth.ScopePlaylistReadPrivate,
+		spotifyauth.ScopePlaylistReadCollaborative,
+		))
 	state = uuid.New().String()
 	ch    = make(chan *spotify.Client)
 	client *spotify.Client
@@ -76,6 +81,10 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Println("You are logged in as:", user.ID)
+
+	Synchronize()
+
+	Search("Kallisto")
 }
 
 
