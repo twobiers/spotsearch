@@ -24,7 +24,7 @@ func init() {
 
 func search(query string) {
 	state, _ := data.LoadState()
-	client, _ := client.GetSpotifyClient()
+	client, _ := client.BuildClient()
 	result, err := client.Search(context.Background(), query, spotify.SearchTypeTrack)
 	if err != nil {
 		log.Fatal(err)

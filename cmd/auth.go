@@ -33,11 +33,12 @@ func init() {
 }
 
 func test() {
-	result := client.TestAuth()
-	if !result {
-		fmt.Println("Authentication is invalid")
+	err := client.TestAuth()
+
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "The provided authentication is invalid")
 		os.Exit(1)
 	}
 
-	fmt.Println("Authentication works as intended")
+	fmt.Println("Authentication is valid")
 }
