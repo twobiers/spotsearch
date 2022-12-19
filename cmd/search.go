@@ -1,15 +1,30 @@
-package main
+package cmd
 
 import (
 	"context"
 	"log"
+	"strings"
 
+	"github.com/spf13/cobra"
+	client "github.com/twobiers/spotsearch/internal/pkg/client"
+	data "github.com/twobiers/spotsearch/internal/pkg/data"
 	"github.com/zmb3/spotify/v2"
 )
 
-func Search(query string) {
-	state, _ := LoadState()
-	client := GetSpotifyClient()
+var searchCmd = &cobra.Command{
+	Use:   "search",
+	Run: func(cmd *cobra.Command, args []string) {
+	  search(strings.Join(args, " "))
+	},
+  }
+
+func init() {
+	rootCmd.AddCommand(searchCmd)
+}
+
+func search(query string) {
+	state, _ := data.LoadState()
+	client := client.GetSpotifyClient()
 	result, err := client.Search(context.Background(), query, spotify.SearchTypeTrack)
 	if err != nil {
 		log.Fatal(err)
@@ -21,7 +36,7 @@ func Search(query string) {
 
 	track := result.Tracks.Tracks[0]
 
-	containingPlaylists := make([]PlaylistState, 0)
+	containingPlaylists := make([]data.PlaylistState, 0)
 	for _, value := range state.Playlists {
 		if contains(value.Tracks, track.ID.String()) {
 			containingPlaylists = append(containingPlaylists, value)

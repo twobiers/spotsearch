@@ -1,14 +1,28 @@
-package main
+package cmd
 
 import (
 	"context"
 	"log"
 
+	"github.com/spf13/cobra"
+	client "github.com/twobiers/spotsearch/internal/pkg/client"
+	data "github.com/twobiers/spotsearch/internal/pkg/data"
 	"github.com/zmb3/spotify/v2"
 )
 
-func Synchronize() {
-	state, err := LoadState()
+var syncCmd = &cobra.Command{
+	Use:   "sync",
+	Run: func(cmd *cobra.Command, args []string) {
+	  synchronize()
+	},
+  }
+
+func init() {
+	rootCmd.AddCommand(syncCmd)
+}
+
+func synchronize() {
+	state, err := data.LoadState()
 
 	if err != nil {
 		log.Fatal(err)
@@ -34,10 +48,10 @@ func Synchronize() {
 		}
 
 		if state.Playlists == nil {
-			state.Playlists = make(map[string]PlaylistState)
+			state.Playlists = make(map[string]data.PlaylistState)
 		}
 
-		state.Playlists[id] = PlaylistState{
+		state.Playlists[id] = data.PlaylistState{
 			Id: id,
 			SnapshotId: p.SnapshotID,
 			Name: p.Name,
@@ -45,10 +59,10 @@ func Synchronize() {
 		}
 	}
 
-	SaveState(state)
+	data.SaveState(state)
 }
 
-func getOutdatedPlaylists(state State) ([]spotify.SimplePlaylist) {
+func getOutdatedPlaylists(state data.State) ([]spotify.SimplePlaylist) {
 	playlists, err := getPlaylists()
 	if err != nil {
 		log.Fatal(err)
@@ -68,7 +82,7 @@ func getOutdatedPlaylists(state State) ([]spotify.SimplePlaylist) {
 }
 
 func fetchPlaylistItems(id spotify.ID) ([]spotify.PlaylistItem, error) {
-	client := GetSpotifyClient()
+	client := client.GetSpotifyClient()
 
 	total := 20
 	offset := 0
@@ -91,7 +105,7 @@ func fetchPlaylistItems(id spotify.ID) ([]spotify.PlaylistItem, error) {
 }
 
 func getPlaylists() ([]spotify.SimplePlaylist, error) {
-	client := GetSpotifyClient()
+	client := client.GetSpotifyClient()
 
 	total := 20
 	offset := 0
