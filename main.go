@@ -11,9 +11,10 @@ import (
 	"net/http"
 )
 
-const port = 8080
-const addr = ":8080"
-const redirectUri = "http://localhost:8080/callback"
+const (
+	addr = ":8080"
+	redirectUri = "http://localhost" + addr + "/callback"
+)
 
 var (
 	auth  = spotifyauth.New(spotifyauth.WithRedirectURL(redirectUri), spotifyauth.WithScopes(spotifyauth.ScopeUserReadPrivate, spotifyauth.ScopeUserLibraryRead))
